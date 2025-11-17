@@ -1,0 +1,49 @@
+resilience4j:
+  circuitbreaker:
+    circuit-breaker-aspect-order: 1
+    instances:
+      outerApiCircuitBreaker:
+        failureRateThreshold: 50
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 2
+        minimumNumberOfCalls: 1
+        eventConsumerBufferSize: 10
+        registerHealthIndicator: true
+        permittedNumberOfCallsInHalfOpenState: 1
+  retry:
+    retry-aspect-order: 2
+    instances:
+      outerApiRetry:
+        maxAttempts: 10
+        waitDuration: 5000
+        recordExceptions:
+          - ForRetryException
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: mapping,bus-refresh-bus-env,health,circuitbreakerevents,retry
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+
+logging:
+  level:
+    root: info
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+outerApi:
+  client: feign
